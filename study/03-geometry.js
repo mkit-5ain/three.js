@@ -179,51 +179,42 @@ class App {
          * 5,6 토러스를 나타내는 반복 횟수
          */
 
-        const fontLoader = new THREE.FontLoader();
+        const fontLoader = new FontLoader();
         
         async function loadFont(that) {
             const url = "../examples/fonts/helvetiker_regular.typeface.json";
             const font = await new Promise ((resolve, reject) => {
-                fontLoader(url, resolve, undefined, reject);
-            })
-        }
-        loadFont(this);
+                fontLoader.load(url, resolve, undefined, reject);
+            });
 
-        const shape = new THREE.Shape();
-        const x = -2.5, y = -5;
-        shape.moveTo(x + 2.5, y + 2.5);
-        shape.bezierCurveTo(x + 2.5, y+ 2.5, x+ 2, y, x, y);
-        shape.bezierCurveTo(x - 3, y, x - 3, y + 3.5, x - 3, y + 3.5);
-        shape.bezierCurveTo(x - 3, y + 5.5, x - 1.5, y + 7.7, x + 2.5, y + 9.5);
-        shape.bezierCurveTo(x + 6, y + 7.7, x + 8, y + 4.5, x + 8, y  + 3.5);
-        shape.bezierCurveTo(x + 8, y + 3.5, x + 8, y, x + 5, y);
-        shape.bezierCurveTo(x + 3.5, y, x + 2.5, y + 2.5, x + 2.5, y + 2.5);
+            const geometry = new TextGeometry("MONG", {
+                font: font,
+                size: 5,
+                height: 1.8,
+                curveSegments: 5,
+                bevelEnbled: true, //베벨링 처리 할것인가 옵션 기본값 == true
+                bevelThickness: 1.5, // 베벨링의 대한 두께 값 기본값 == 6 
+                bevelSize: 0.2, // 쉐잎의 왜각선으로 부터 얼마나 멀리 베벨링 할것인가의 대한 거리 기본값 == 2 
+                bevelSegments: 5, // 베벨링 단계 의 수 기본값 == 3
+            });
 
-        const settings = {
-            steps: 2, // 깊이 방향으로의 분할 수 기본값 = 1
-            depth: 4, // 깊이값 기본값 = 100
-            bevelEnbled: true, //베벨링 처리 할것인가 옵션 기본값 == true
-            bevelThickness: 1.6, // 베벨링의 대한 두께 값 기본값 == 6 
-            bevelSize: 1.5, // 쉐잎의 왜각선으로 부터 얼마나 멀리 베벨링 할것인가의 대한 거리 기본값 == 2 
-            bevelSegments: 6, // 베벨링 단계 의 수 기본값 == 3
+            const fillMaterial = new THREE.MeshPhongMaterial({ color: 0x515151});
+            const cube = new THREE.Mesh(geometry, fillMaterial);
+
+            const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffff00});
+            const line = new THREE.LineSegments(
+                new THREE.WireframeGeometry(geometry), lineMaterial // 와이어 프레임 지오메트리 
+            );
+
+            const group = new THREE.Group();
+            group.add(cube);
+            group.add(line);
+
+            that._scene.add(group);
+            that._cube = group;
         };
 
-        const geometry = new THREE.ExtrudeGeometry(shape, settings); // 위 생성자의 인자로 전달받음
-
-        const fillMaterial = new THREE.MeshPhongMaterial({ color: 0x515151});
-        const cube = new THREE.Mesh(geometry, fillMaterial);
-
-        const lineMaterial = new THREE.LineBasicMaterial({ color: 0xffff00});
-        const line = new THREE.LineSegments(
-            new THREE.WireframeGeometry(geometry), lineMaterial // 와이어 프레임 지오메트리 
-        );
-
-        const group = new THREE.Group();
-        group.add(cube);
-        group.add(line);
-
-        this._scene.add(group);
-        this._cube = group;
+        loadFont(this);
     }
 
     resize () {
