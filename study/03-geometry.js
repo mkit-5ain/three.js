@@ -11,6 +11,9 @@
 
 import * as THREE from "../build/three.module.js";
 import { OrbitControls } from "../controls/OrbitControls.js";
+import { FontLoader } from "../examples/jsm/loaders/FontLoader.js";
+import { TextGeometry } from "../examples/jsm/geometries/TextGeometry.js";
+
 
 /**
  * 
@@ -56,6 +59,7 @@ class App {
             0.1,
             100
         );
+        camera.position.x = -15;
         camera.position.z = 15;
         this._camera = camera;
     }
@@ -175,8 +179,17 @@ class App {
          * 5,6 토러스를 나타내는 반복 횟수
          */
 
-        const shape = new THREE.Shape();
+        const fontLoader = new THREE.FontLoader();
+        
+        async function loadFont(that) {
+            const url = "../examples/fonts/helvetiker_regular.typeface.json";
+            const font = await new Promise ((resolve, reject) => {
+                fontLoader(url, resolve, undefined, reject);
+            })
+        }
+        loadFont(this);
 
+        const shape = new THREE.Shape();
         const x = -2.5, y = -5;
         shape.moveTo(x + 2.5, y + 2.5);
         shape.bezierCurveTo(x + 2.5, y+ 2.5, x+ 2, y, x, y);
@@ -186,7 +199,16 @@ class App {
         shape.bezierCurveTo(x + 8, y + 3.5, x + 8, y, x + 5, y);
         shape.bezierCurveTo(x + 3.5, y, x + 2.5, y + 2.5, x + 2.5, y + 2.5);
 
-        const geometry = new THREE.ShapeGeometry(shape); // 위 생성자의 인자로 전달받음
+        const settings = {
+            steps: 2, // 깊이 방향으로의 분할 수 기본값 = 1
+            depth: 4, // 깊이값 기본값 = 100
+            bevelEnbled: true, //베벨링 처리 할것인가 옵션 기본값 == true
+            bevelThickness: 1.6, // 베벨링의 대한 두께 값 기본값 == 6 
+            bevelSize: 1.5, // 쉐잎의 왜각선으로 부터 얼마나 멀리 베벨링 할것인가의 대한 거리 기본값 == 2 
+            bevelSegments: 6, // 베벨링 단계 의 수 기본값 == 3
+        };
+
+        const geometry = new THREE.ExtrudeGeometry(shape, settings); // 위 생성자의 인자로 전달받음
 
         const fillMaterial = new THREE.MeshPhongMaterial({ color: 0x515151});
         const cube = new THREE.Mesh(geometry, fillMaterial);
